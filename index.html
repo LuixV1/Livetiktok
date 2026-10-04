@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>TikTok Live - Votação Dupla Separada</title>
+  <style>
+    :root {
+      --color-l: #ff0055;
+      --color-r: #00f2fe;
+      --bg-dark: #08090f;
+      --panel-bg: #11131f;
+      --border-color: #23273a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+    }
+
+    .main-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+      max-width: 1200px;
+      align-items: center;
+    }
+
+    @media (min-width: 900px) {
+      .main-wrapper {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+    }
+
+    /* =======================================
+       1. ÁREA DE EXIBIÇÃO DA LIVE (CROP OBS / CELULAR)
+    ======================================= */
+    .game-crop-box {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      height: 680px;
+      background: radial-gradient(circle at center, #1a1d2e 0%, #0a0b12 100%);
+      border: 3px dashed #ff0055;
+      border-radius: 24px;
+      box-shadow: 0 0 35px rgba(255, 0, 85, 0.25);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 18px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .crop-tag {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: #ff0055;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      letter-spacing: 1px;
+      z-index: 10;
+    }
+
+    .game-title {
+      font-size: 22px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #00f2fe;
+      text-shadow: 0 0 12px rgba(0, 242, 254, 0.6);
+      margin-top: 12px;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    /* PLACAR TOTAL */
+    .total-votes-badge {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-color);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      color: #aaa;
+      font-weight: bold;
+    }
+
+    .total-votes-badge span {
+      color: #fff;
+      font-size: 15px;
+    }
+
+    /* SEÇÃO DE BARRAS SEPARADAS */
+    .bars-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      width: 100%;
+      margin: 10px 0;
+    }
+
+    .option-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .option-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .option-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #181a29;
+      border: 2px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(255,255,255,0.1);
+    }
+
+    .option-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .option-name {
+      font-size: 17px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .option-stats {
+      text-align: right;
+    }
+
+    .vote-count {
+      font-size: 20px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .vote-percent {
+      font-size: 12px;
+      color: #8e95ad;
+      font-weight: bold;
+    }
+
+    /* BARRAS DE PROGRESSO INDEPENDENTES */
+    .progress-outer {
+      position: relative;
+      width: 100%;
+      height: 20px;
+      background: #0d0e17;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 10px;
+      transition: width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .fill-left {
+      background: var(--color-l);
+      box-shadow: 0 0 12px var(--color-l);
+    }
+
+    .fill-right {
+      background: var(--color-r);
+      box-shadow: 0 0 12px var(--color-r);
+    }
+
+    /* INSTRUÇÕES DA LIVE */
+    .live-instructions {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 12px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .live-instructions h4 {
+      color: #00f2fe;
+      font-size: 12px;
+      margin-bottom: 6px;
+      letter-spacing: 1px;
+    }
+
+    .live-instructions p {
+      font-size: 13px;
+      color: #ddd;
+      margin-bottom: 4px;
+    }
+
+    /* =======================================
+       2. CONTROLE DO STREAMER (ADMIN)
+    ======================================= */
+    .admin-panel {
+      width: 100%;
+      max-width: 440px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    @media (min-width: 900px) {
+      .admin-panel {
+        max-width: none;
+        flex: 1;
+        height: 680px;
+        overflow-y: auto;
+      }
+    }
+
+    .admin-panel h2 {
+      color: #ff0055;
+      font-size: 18px;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-group label {
+      font-size: 12px;
+      color: #8e95ad;
+      font-weight: 700;
+    }
+
+    .row-inputs {
+      display: flex;
+      gap: 8px;
+    }
+
+    input[type="text"], input[type="color"] {
+      background: #08090f;
+      border: 1px solid var(--border-color);
+      color: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      outline: none;
+      width: 100%;
+      font-size: 13px;
+    }
+
+    input[type="color"] {
+      height: 40px;
+      width: 50px;
+      cursor: pointer;
+      padding: 2px;
+      flex-shrink: 0;
+    }
+
+    /* BOTÕES DE VOTAÇÃO MANUAL */
+    .vote-buttons-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .btn-vote-column {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .btn {
+      background: #1e2235;
+      color: #fff;
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-l {
+      background: var(--color-l);
+      color: #fff;
+      border: none;
+      box-shadow: 0 4px 12px rgba(255, 0, 85, 0.3);
+    }
+
+    .btn-r {
+      background: var(--color-r);
+      color: #000;
+      border: none;
+      box-shadow: 0 4px 12px rgba(0, 242, 254, 0.3);
+    }
+
+    .btn-sub {
+      background: #181a29;
+      font-size: 11px;
+      padding: 8px;
+    }
+
+    .btn-reset {
+      background: #25283b;
+      color: #ff4757;
+      border: 1px solid #3a222f;
+    }
+
+    .btn-sim {
+      background: #202b38;
+      color: #00f2fe;
+      border: 1px solid #194656;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="main-wrapper">
+    
+    <!-- =======================================
+         1. ÁREA DA LIVE (ENQUADRE SÓ ESTA CAIXA)
+    ====================================== -->
+    <div class="game-crop-box" id="cropArea">
+      <div class="crop-tag">🎯 ÁREA DA LIVE</div>
+
+      <div class="game-title" id="displayGameTitle">VOTAÇÃO DA LIVE</div>
+
+      <div class="total-votes-badge">
+        Total de Votos: <span id="totalVotesText">0</span>
+      </div>
+
+      <!-- CONTAINER DAS DUAS BARRAS SEPARADAS -->
+      <div class="bars-container">
+        
+        <!-- OPÇÃO 1 -->
+        <div class="option-card">
+          <div class="option-header">
+            <div class="option-info">
+              <div class="option-avatar" id="avatarLeft">🦂</div>
+              <div class="option-name" id="nameLeftDisplay">Scorpion</div>
+            </div>
+            <div class="option-stats">
+              <div class="vote-count" id="votesLeftText" style="color: var(--color-l);">0</div>
+              <div class="vote-percent" id="percentLeftText">0%</div>
+            </div>
+          </div>
+          <div class="progress-outer">
+            <div class="progress-fill fill-left" id="barLeft"></div>
+          </div>
+        </div>
+
+        <!-- OPÇÃO 2 -->
+        <div class="option-card">
+          <div class="option-header">
+            <div class="option-info">
+              <div class="option-avatar" id="avatarRight">❄️</div>
+              <div class="option-name" id="nameRightDisplay">Sub-Zero</div>
+            </div>
+            <div class="option-stats">
+              <div class="vote-count" id="votesRightText" style="color: var(--color-r);">0</div>
+              <div class="vote-percent" id="percentRightText">0%</div>
+            </div>
+          </div>
+          <div class="progress-outer">
+            <div class="progress-fill fill-right" id="barRight"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- INSTRUÇÕES PARA O PÚBLICO -->
+      <div class="live-instructions">
+        <h4>🔥 COMO VOTAR NA LIVE 🔥</h4>
+        <p id="instructionLeftText">🌹 Mande <b>ROSA</b> para votar em <b id="cmdLeftName">Scorpion</b></p>
+        <p id="instructionRightText">🍩 Mande <b>DONUT</b> para votar em <b id="cmdRightName">Sub-Zero</b></p>
+      </div>
+    </div>
+
+    <!-- =======================================
+         2. PAINEL DE ADMINISTRAÇÃO (STREAMER)
+    ======================================= -->
+    <div class="admin-panel">
+      <h2>⚙️ Painel de Controle</h2>
+
+      <!-- Título -->
+      <div class="control-group">
+        <label>Título da Votação:</label>
+        <input type="text" id="inputGameTitle" value="VOTAÇÃO DA LIVE" oninput="updateSettings()">
+      </div>
+
+      <!-- Opção 1 -->
+      <div class="control-group">
+        <label>Opção 1 (Esquerda):</label>
+        <div class="row-inputs">
+          <input type="text" id="inputNameLeft" value="Scorpion" placeholder="Nome" oninput="updateSettings()">
+          <input type="text" id="inputAvatarLeft" value="🦂" placeholder="Emoji / Link Foto" oninput="updateSettings()">
+          <input type="color" id="inputColorLeft" value="#ff0055" onchange="updateSettings()">
+        </div>
+      </div>
+
+      <!-- Opção 2 -->
+      <div class="control-group">
+        <label>Opção 2 (Direita):</label>
+        <div class="row-inputs">
+          <input type="text" id="inputNameRight" value="Sub-Zero" placeholder="Nome" oninput="updateSettings()">
+          <input type="text" id="inputAvatarRight" value="❄️" placeholder="Emoji / Link Foto" oninput="updateSettings()">
+          <input type="color" id="inputColorRight" value="#00f2fe" onchange="updateSettings()">
+        </div>
+      </div>
+
+      <!-- BOTÕES DE VOTO MANUAL -->
+      <div class="control-group">
+        <label>Computar Votos Manualmente:</label>
+        
+        <div class="vote-buttons-grid">
+          <!-- Coluna 1 -->
+          <div class="btn-vote-column">
+            <button class="btn btn-l" onclick="addVotes('left', 1)">+1 Voto Opção 1</button>
+            <div style="display: flex; gap: 4px;">
+              <button class="btn btn-sub" style="flex: 1;" onclick="addVotes('left', 5)">+5</button>
+              <button class="btn btn-sub" style="flex: 1;" onclick="addVotes('left', 10)">+10</button>
+            </div>
+          </div>
+
+          <!-- Coluna 2 -->
+          <div class="btn-vote-column">
+            <button class="btn btn-r" onclick="addVotes('right', 1)">+1 Voto Opção 2</button>
+            <div style="display: flex; gap: 4px;">
+              <button class="btn btn-sub" style="flex: 1;" onclick="addVotes('right', 5)">+5</button>
+              <button class="btn btn-sub" style="flex: 1;" onclick="addVotes('right', 10)">+10</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Utilitários -->
+      <div class="row-inputs" style="margin-top: 5px;">
+        <button class="btn btn-sim" style="flex: 1;" id="simBtn" onclick="toggleAutoSim()">🤖 Simular Votos: OFF</button>
+        <button class="btn btn-reset" style="flex: 1;" onclick="resetVotes()">🔄 Zerar Votação</button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    let votesLeft = 0;
+    let votesRight = 0;
+    let autoSimInterval = null;
+
+    function updateUI() {
+      const total = votesLeft + votesRight;
+
+      document.getElementById('votesLeftText').innerText = votesLeft;
+      document.getElementById('votesRightText').innerText = votesRight;
+      document.getElementById('totalVotesText').innerText = total;
+
+      let pctLeft = total > 0 ? Math.round((votesLeft / total) * 100) : 0;
+      let pctRight = total > 0 ? Math.round((votesRight / total) * 100) : 0;
+
+      document.getElementById('percentLeftText').innerText = pctLeft + '%';
+      document.getElementById('percentRightText').innerText = pctRight + '%';
+
+      // Animação das Barras (Progresso relativo entre as duas)
+      document.getElementById('barLeft').style.width = pctLeft + '%';
+      document.getElementById('barRight').style.width = pctRight + '%';
+    }
+
+    function addVotes(side, amount) {
+      if (side === 'left') votesLeft += amount;
+      if (side === 'right') votesRight += amount;
+      updateUI();
+    }
+
+    function resetVotes() {
+      votesLeft = 0;
+      votesRight = 0;
+      updateUI();
+    }
+
+    function updateSettings() {
+      const title = document.getElementById('inputGameTitle').value;
+      const nameL = document.getElementById('inputNameLeft').value;
+      const avatarL = document.getElementById('inputAvatarLeft').value;
+      const colorL = document.getElementById('inputColorLeft').value;
+
+      const nameR = document.getElementById('inputNameRight').value;
+      const avatarR = document.getElementById('inputAvatarRight').value;
+      const colorR = document.getElementById('inputColorRight').value;
+
+      document.documentElement.style.setProperty('--color-l', colorL);
+      document.documentElement.style.setProperty('--color-r', colorR);
+
+      document.getElementById('displayGameTitle').innerText = title || 'VOTAÇÃO DA LIVE';
+      document.getElementById('nameLeftDisplay').innerText = nameL || 'Opção 1';
+      document.getElementById('nameRightDisplay').innerText = nameR || 'Opção 2';
+      document.getElementById('cmdLeftName').innerText = nameL || 'Opção 1';
+      document.getElementById('cmdRightName').innerText = nameR || 'Opção 2';
+
+      document.getElementById('nameLeftDisplay').style.color = colorL;
+      document.getElementById('nameRightDisplay').style.color = colorR;
+
+      setAvatar('avatarLeft', avatarL);
+      setAvatar('avatarRight', avatarR);
+    }
+
+    function setAvatar(elementId, value) {
+      const el = document.getElementById(elementId);
+      if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('data:image')) {
+        el.innerHTML = `<img src="${value}" alt="avatar">`;
+      } else {
+        el.innerText = value || '👤';
+      }
+    }
+
+    function toggleAutoSim() {
+      const btn = document.getElementById('simBtn');
+      if (autoSimInterval) {
+        clearInterval(autoSimInterval);
+        autoSimInterval = null;
+        btn.innerText = '🤖 Simular Votos: OFF';
+      } else {
+        btn.innerText = '🤖 Simular Votos: ON';
+        autoSimInterval = setInterval(() => {
+          if (Math.random() > 0.5) {
+            addVotes('left', 1);
+          } else {
+            addVotes('right', 1);
+          }
+        }, 1000);
+      }
+    }
+
+    // Atalhos do Teclado para PC: Tecla A / Seta Esquerda (Opção 1) e Tecla D / Seta Direita (Opção 2)
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT') return;
+      if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') addVotes('left', 1);
+      if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') addVotes('right', 1);
+      if (e.key.toLowerCase() === 'r') resetVotes();
+    });
+
+    updateSettings();
+    updateUI();
+  </script>
+</body>
+</html>
