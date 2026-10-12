@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AmigoPet - Gestão de Doações e Sorteios</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .aba-ativa { background-color: #0f172a; color: #ffffff; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-amber-500 selection:text-white">
+
+    <!-- SITE PÚBLICO -->
+    <div id="site-publico">
+        <!-- Header -->
+        <header class="bg-white/90 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40 shadow-sm">
+            <div class="max-w-6xl mx-auto px-4 py-3.5 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <div class="w-9 h-9 bg-amber-500 rounded-xl flex items-center justify-center text-white text-lg shadow-md shadow-amber-500/20">
+                        <i class="fa-solid fa-paw"></i>
+                    </div>
+                    <span class="text-xl font-black text-slate-900 tracking-tight">Amigo<span class="text-amber-500">Pet</span></span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="abrirModalDoacao('Geral')" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition">
+                        <i class="fa-solid fa-heart mr-1"></i> Quero Doar
+                    </button>
+                    <button onclick="abrirModalLogin()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3 py-2.5 rounded-xl transition" title="Área Administrativa">
+                        <i class="fa-solid fa-user-gear"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Banner Principal -->
+        <section class="max-w-6xl mx-auto px-4 py-8 grid md:grid-cols-2 gap-8 items-center">
+            <div>
+                <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block mb-3">
+                    <i class="fa-solid fa-location-dot mr-1"></i> Manaus - AM
+                </span>
+                <h1 id="pub-banner-titulo" class="text-3xl md:text-4xl font-black text-slate-900 leading-tight">
+                    Ajude um pet resgatado ou participe da nossa rifa!
+                </h1>
+                <p id="pub-banner-desc" class="text-slate-600 text-sm mt-3 leading-relaxed">
+                    Toda doação vai direto para alimentação, cirurgias e remédios dos nossos resgatados.
+                </p>
+
+                <!-- BARRA DE META VISÍVEL AO PÚBLICO -->
+                <div class="mt-6 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center text-xs font-extrabold mb-2">
+                        <span class="text-slate-700"><i class="fa-solid fa-bullseye text-amber-500 mr-1"></i> META DE ARRECADAÇÃO DO MÊS</span>
+                        <span id="pub-meta-pct" class="text-amber-600">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-3.5 rounded-full overflow-hidden p-0.5 border border-slate-200/60">
+                        <div id="pub-meta-bar" class="bg-gradient-to-r from-amber-400 to-amber-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-500 mt-2 font-medium">
+                        <span>Arrecadado: <strong id="pub-meta-arrecadado" class="text-slate-900">R$ 0,00</strong></span>
+                        <span>Meta: <strong id="pub-meta-objetivo" class="text-slate-900">R$ 5.000,00</strong></span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <img id="pub-banner-img" src="https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=700&q=80" class="rounded-3xl shadow-xl w-full h-72 object-cover border border-slate-200">
+            </div>
+        </section>
+
+        <!-- Sorteio Solidário -->
+        <section class="bg-amber-500/10 border-y border-amber-500/20 py-8">
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="bg-white rounded-3xl p-6 shadow-sm grid md:grid-cols-2 gap-6 items-center border border-amber-200">
+                    <div>
+                        <span class="bg-amber-500 text-white text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider">Rifa Solidária</span>
+                        <h3 id="pub-sorteio-titulo" class="text-2xl font-black text-slate-900 mt-2">Cesta de Prêmios + R$ 200 no Pix 🎁</h3>
+                        <p id="pub-sorteio-desc" class="text-xs text-slate-600 mt-1 leading-relaxed">Compre seu bilhete por apenas R$ 10,00 e nos ajude a comprar ração.</p>
+                        <button onclick="abrirModalDoacao('Sorteio', 10)" class="mt-4 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-lg shadow-amber-500/20 transition flex items-center space-x-2">
+                            <i class="fa-solid fa-ticket"></i>
+                            <span>Comprar Bilhete do Sorteio</span>
+                        </button>
+                    </div>
+                    <div>
+                        <img id="pub-sorteio-img" src="https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=600&q=80" class="rounded-2xl h-48 w-full object-cover shadow-sm border border-slate-100">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Galeria de Pets Resgatados -->
+        <section class="max-w-6xl mx-auto px-4 py-12">
+            <div class="text-center max-w-xl mx-auto mb-8">
+                <span class="bg-amber-100 text-amber-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">Causas Individuais</span>
+                <h2 class="text-2xl font-black text-slate-900 mt-2">Pets que Precisam de Ajuda 🐾</h2>
+            </div>
+            <div id="grid-pets-publicos" class="grid sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+        </section>
+    </div>
+
+    <!-- MODAL DE DOAÇÃO -->
+    <div id="modal-doacao" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="fecharModalDoacao()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 id="modal-titulo" class="text-xl font-black text-slate-900">Nova Doação</h3>
+            <p class="text-xs text-slate-500 mb-4">Escolha o valor e vá para o pagamento seguro.</p>
+
+            <form onsubmit="irParaPagamentoMP(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Valor (R$)</label>
+                    <input type="number" id="valor-doacao" value="20" min="1" step="0.01" required class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2 text-sm font-bold focus:outline-none focus:border-amber-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Seu Nome (Opcional)</label>
+                    <input type="text" id="nome-doador" placeholder="Ex: Lucas" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-amber-500">
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3 space-y-2">
+                    <p class="text-[11px] font-bold text-amber-900"><i class="fa-solid fa-exclamation-circle mr-1 text-amber-600"></i> Preencha E-mail OU WhatsApp</p>
+                    <input type="email" id="email-doador" placeholder="Seu E-mail" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-amber-500">
+                    <input type="tel" id="telefone-doador" placeholder="Seu WhatsApp com DDD" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-amber-500">
+                </div>
+
+                <button type="submit" id="btn-gerar-pix" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-xl text-xs transition shadow-md flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>Prosseguir para Pagamento Seguro</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL LOGIN ADMIN -->
+    <div id="modal-login" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl relative">
+            <button onclick="fecharModalLogin()" class="absolute top-4 right-4 text-slate-400">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center mb-4">
+                <div class="w-10 h-10 bg-slate-900 text-amber-400 rounded-xl flex items-center justify-center mx-auto mb-2 text-lg">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900">Login Painel Admin</h3>
+            </div>
+            <form onsubmit="loginAdminDireto(event)" class="space-y-3">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Palavra-passe</label>
+                    <input type="password" id="login-senha" placeholder="••••••••" required class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs bg-slate-50">
+                </div>
+                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs transition">
+                    Entrar no Painel
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PAINEL DE ADMINISTRAÇÃO -->
+    <div id="painel-admin" class="hidden min-h-screen bg-slate-100 pb-12">
+        <header class="bg-slate-900 text-white p-4 sticky top-0 z-40 border-b border-slate-800">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <h2 class="font-bold text-sm flex items-center space-x-2">
+                    <span class="bg-amber-500 text-slate-900 text-[10px] font-black px-2 py-0.5 rounded uppercase">Admin</span>
+                    <span>Painel de Gestão - AmigoPet</span>
+                </h2>
+                <button onclick="sairAdmin()" class="bg-rose-500 hover:bg-rose-600 text-white text-xs px-3 py-1.5 rounded-lg transition font-bold">Sair</button>
+            </div>
+        </header>
+
+        <main class="max-w-6xl mx-auto px-4 mt-6">
+            <!-- Abas do Admin -->
+            <div class="flex space-x-2 border-b border-slate-200 mb-6 overflow-x-auto pb-2">
+                <button onclick="trocarAba('dash', this)" class="btn-aba aba-ativa font-bold text-xs px-4 py-2 rounded-xl transition">Dashboard & Financeiro</button>
+                <button onclick="trocarAba('doacoes', this)" class="btn-aba bg-white text-slate-600 font-bold text-xs px-4 py-2 rounded-xl transition">Doações Recebidas</button>
+                <button onclick="trocarAba('gastos', this)" class="btn-aba bg-white text-slate-600 font-bold text-xs px-4 py-2 rounded-xl transition">Lançar Gastos</button>
+                <button onclick="trocarAba('cad-banner', this)" class="btn-aba bg-white text-slate-600 font-bold text-xs px-4 py-2 rounded-xl transition">Configurações & MP Token</button>
+                <button onclick="trocarAba('cad-pet', this)" class="btn-aba bg-white text-slate-600 font-bold text-xs px-4 py-2 rounded-xl transition">Cadastrar Pet</button>
+                <button onclick="trocarAba('cad-sorteio', this)" class="btn-aba bg-white text-slate-600 font-bold text-xs px-4 py-2 rounded-xl transition">Editar Sorteio</button>
+                <button onclick="trocarAba('seguranca', this)" class="btn-aba bg-white text-slate-600 font-bold text-xs px-4 py-2 rounded-xl transition"><i class="fa-solid fa-key mr-1"></i> Alterar Senha</button>
+                <button onclick="trocarAba('reset-sistema', this)" class="btn-aba bg-rose-50 text-rose-600 font-bold text-xs px-4 py-2 rounded-xl transition"><i class="fa-solid fa-rotate-left mr-1"></i> Limpeza & Reset</button>
+            </div>
+
+            <!-- ABA 1: DASHBOARD & CAIXA -->
+            <div id="aba-dash" class="space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Arrecadado (Entradas)</p>
+                        <h3 id="dash-total" class="text-2xl font-black text-emerald-600 mt-1">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total de Gastos (Saídas)</p>
+                        <h3 id="dash-gastos" class="text-2xl font-black text-rose-500 mt-1">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Saldo Disponível em Caixa</p>
+                        <h3 id="dash-saldo" class="text-2xl font-black text-slate-900 mt-1">R$ 0,00</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <h4 class="font-bold text-slate-800 text-xs mb-4">Evolução do Caixa da Semana (R$)</h4>
+                    <canvas id="grafico" class="max-h-[220px]"></canvas>
+                </div>
+            </div>
+
+            <!-- ABA 2: DOAÇÕES RECEBIDAS -->
+            <div id="aba-doacoes" class="hidden space-y-4">
+                <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                    <input type="text" id="busca-doador" onkeyup="filtrarDoacoes()" placeholder="Buscar por doador ou contato..." class="border border-slate-200 rounded-lg px-3 py-1.5 text-xs w-64 bg-slate-50">
+                    <button onclick="exportarCSV()" class="bg-slate-900 text-white font-bold text-xs px-3.5 py-2 rounded-lg transition"><i class="fa-solid fa-file-csv mr-1"></i> Baixar Relatório CSV</button>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-x-auto shadow-sm">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 border-b border-slate-200 font-bold uppercase text-slate-400">
+                            <tr><th class="p-3">Doador</th><th class="p-3">Destino</th><th class="p-3">Contato</th><th class="p-3">Valor</th><th class="p-3">Data</th></tr>
+                        </thead>
+                        <tbody id="tabela-doacoes" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ABA 3: LANÇAR GASTOS -->
+            <div id="aba-gastos" class="hidden grid md:grid-cols-3 gap-6">
+                <form onsubmit="cadastrarGasto(event)" class="bg-white p-5 rounded-2xl border border-slate-200 space-y-3 md:col-span-1 shadow-sm">
+                    <h3 class="font-bold text-sm text-slate-900">Registrar Nova Despesa</h3>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição do Gasto</label>
+                        <input type="text" id="gasto-desc" placeholder="Ex: Ração 15kg" required class="w-full border border-slate-200 rounded-lg p-2 text-xs bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Valor do Gasto (R$)</label>
+                        <input type="number" id="gasto-valor" placeholder="Ex: 150" required class="w-full border border-slate-200 rounded-lg p-2 text-xs bg-slate-50">
+                    </div>
+                    <button type="submit" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 rounded-xl text-xs transition">
+                        Registrar Saída de Caixa
+                    </button>
+                </form>
+
+                <div class="md:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-sm text-slate-900 mb-3">Histórico de Saídas</h3>
+                    <div id="lista-gastos-admin" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- ABA 4: CONFIGURAÇÕES E MERCADO PAGO TOKEN -->
+            <div id="aba-cad-banner" class="hidden max-w-md mx-auto">
+                <form onsubmit="salvarBannerEMeta(event)" class="bg-white p-5 rounded-2xl border border-slate-200 space-y-3 shadow-sm">
+                    <h3 class="font-bold text-sm text-slate-900">Ajustar Banner & Mercado Pago</h3>
+                    
+                    <div class="bg-amber-50 p-3 rounded-xl border border-amber-200">
+                        <label class="block text-[10px] font-bold text-amber-900 uppercase mb-1"><i class="fa-solid fa-key mr-1"></i> Mercado Pago Access Token (API Real)</label>
+                        <input type="password" id="mp-access-token" value="APP_USR-4022091324776872-101208-e824a993d04b65cd7032c92028ff39d0-3759515470" placeholder="APP_USR-xxxxxxx..." class="w-full border border-amber-200 rounded-lg p-2 text-xs bg-white">
+                        <p class="text-[9px] text-amber-700 mt-1">Token de Produção configurado com sucesso.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Meta de Arrecadação do Mês (R$)</label>
+                        <input type="number" id="meta-valor-input" required value="5000" class="w-full border border-slate-200 rounded-lg p-2 text-xs bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Título do Banner Principal</label>
+                        <input type="text" id="banner-titulo" required value="Ajude um pet resgatado ou participe da nossa rifa!" class="w-full border border-slate-200 rounded-lg p-2 text-xs bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição do Banner</label>
+                        <textarea id="banner-desc" required class="w-full border border-slate-200 rounded-lg p-2 text-xs h-16 bg-slate-50">Toda doação vai direto para alimentação, cirurgias e remédios dos nossos resgatados.</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Foto do Banner (Upload)</label>
+                        <input type="file" accept="image/*" onchange="pr
