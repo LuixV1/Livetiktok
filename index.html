@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AmigoPet - Gestão de Doações e Sorteios</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .aba-ativa { background-color: #0f172a; color: #ffffff; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-amber-500 selection:text-white">
+
+    <!-- SITE PÚBLICO -->
+    <div id="site-publico">
+        <!-- Header -->
+        <header class="bg-white/90 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40 shadow-sm">
+            <div class="max-w-6xl mx-auto px-4 py-3.5 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <div class="w-9 h-9 bg-amber-500 rounded-xl flex items-center justify-center text-white text-lg shadow-md shadow-amber-500/20">
+                        <i class="fa-solid fa-paw"></i>
+                    </div>
+                    <span class="text-xl font-black text-slate-900 tracking-tight">Amigo<span class="text-amber-500">Pet</span></span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="abrirModalDoacao('Geral')" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition">
+                        <i class="fa-solid fa-heart mr-1"></i> Quero Doar
+                    </button>
+                    <button onclick="abrirModalLogin()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3 py-2.5 rounded-xl transition" title="Área Administrativa">
+                        <i class="fa-solid fa-user-gear"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Banner Principal -->
+        <section class="max-w-6xl mx-auto px-4 py-8 grid md:grid-cols-2 gap-8 items-center">
+            <div>
+                <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider inline-block mb-3">
+                    <i class="fa-solid fa-location-dot mr-1"></i> Manaus - AM
+                </span>
+                <h1 id="pub-banner-titulo" class="text-3xl md:text-4xl font-black text-slate-900 leading-tight">
+                    Ajude um pet resgatado ou participe da nossa rifa!
+                </h1>
+                <p id="pub-banner-desc" class="text-slate-600 text-sm mt-3 leading-relaxed">
+                    Toda doação vai direto para alimentação, cirurgias e remédios dos nossos resgatados.
+                </p>
+
+                <!-- BARRA DE META VISÍVEL AO PÚBLICO -->
+                <div class="mt-6 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center text-xs font-extrabold mb-2">
+                        <span class="text-slate-700"><i class="fa-solid fa-bullseye text-amber-500 mr-1"></i> META DE ARRECADAÇÃO DO MÊS</span>
+                        <span id="pub-meta-pct" class="text-amber-600">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-3.5 rounded-full overflow-hidden p-0.5 border border-slate-200/60">
+                        <div id="pub-meta-bar" class="bg-gradient-to-r from-amber-400 to-amber-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-500 mt-2 font-medium">
+                        <span>Arrecadado: <strong id="pub-meta-arrecadado" class="text-slate-900">R$ 0,00</strong></span>
+                        <span>Meta: <strong id="pub-meta-objetivo" class="text-slate-900">R$ 5.000,00</strong></span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <img id="pub-banner-img" src="https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=700&q=80" class="rounded-3xl shadow-xl w-full h-72 object-cover border border-slate-200">
+            </div>
+        </section>
+
+        <!-- Sorteio Solidário -->
+        <section class="bg-amber-500/10 border-y border-amber-500/20 py-8">
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="bg-white rounded-3xl p-6 shadow-sm grid md:grid-cols-2 gap-6 items-center border border-amber-200">
+                    <div>
+                        <span class="bg-amber-500 text-white text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider">Rifa Solidária</span>
+                        <h3 id="pub-sorteio-titulo" class="text-2xl font-black text-slate-900 mt-2">Cesta de Prêmios + R$ 200 no Pix 🎁</h3>
+                        <p id="pub-sorteio-desc" class="text-xs text-slate-600 mt-1 leading-relaxed">Compre seu bilhete por apenas R$ 10,00 e nos ajude a comprar ração.</p>
+                        <button onclick="abrirModalDoacao('Sorteio', 10)" class="mt-4 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-lg shadow-amber-500/20 transition flex items-center space-x-2">
+                            <i class="fa-solid fa-ticket"></i>
+                            <span>Comprar Bilhete do Sorteio</span>
+                        </button>
+                    </div>
+                    <div>
+                        <img id="pub-sorteio-img" src="https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=600&q=80" class="rounded-2xl h-48 w-full object-cover shadow-sm border border-slate-100">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Galeria de Pets Resgatados -->
+        <section class="max-w-6xl mx-auto px-4 py-12">
+            <div class="text-center max-w-xl mx-auto mb-8">
+                <span class="bg-amber-100 text-amber-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">Causas Individuais</span>
+                <h2 class="text-2xl font-black text-slate-900 mt-2">Pets que Precisam de Ajuda 🐾</h2>
+            </div>
+            <div id="grid-pets-publicos" class="grid sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+        </section>
+    </div>
+
+    <!-- MODAL DE DOAÇÃO -->
+    <div id="modal-doacao" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="fecharModalDoacao()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 id="modal-titulo" class="text-xl font-black text-slate-900">Nova Doação</h3>
+            <p class="text-xs text-slate-500 mb-4">Escolha o valor e abra o pagamento via Pix.</p>
+
+            <form onsubmit="irParaPagamentoDireto(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Valor (R$)</label>
+                    <input type="number" id="valor-doacao" value="20" min="1" step="0.01" required class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2 text-sm font-bold focus:outline-none focus:border-amber-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Seu Nome (Opcional)</label>
+                    <input type="text" id="nome-doador" placeholder="Ex: Lucas" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:border-amber-500">
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3 space-y-2">
+                    <p class="text-[11px] font-bold text-amber-900"><i class="fa-solid fa-exclamation-circle mr-1 text-amber-600"></i> Preencha E-mail OU WhatsApp</p>
+                    <input type="email" id="email-doador" placeholder="Seu E-mail" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-amber-500">
+                    <input type="tel" id="telefone-doador" placeholder="Seu WhatsApp com DDD" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-amber-500">
+                </div>
+
+                <button type="submit" id="btn-gerar-pix" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-xl text-xs transition shadow-md flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-qrcode"></i>
+                    <span>Abrir Tela de Pagamento Pix</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL LOGIN ADMIN -->
+    <div id="modal-login" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl relative">
+            <button onclick="fecharModalLogin()" class="absolute top-4 right-4 text-slate-400">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center mb-4">
+                <div class="w-10 h-10 bg-slate-900 text-amber-400 rounded-xl flex items-center justify-center mx-auto mb-2 text-lg">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900">Login Painel Admin</h3>
+            </div>
+            <form onsubmit="loginAdminDireto(event)" class="space-y-3">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Palavra-passe</label>
+                    <input type="password" id="login-senha" placeholder="••••••••" required class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs bg-slate-50">
+                </div>
+                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs transition">
+                    Entrar no Painel
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PAINEL DE ADMINISTRAÇÃO -->
+    <div id="painel-admin" class="hidden min-h-screen bg-slate-100 pb-12">
+        <header class="bg-slate-900 text-white p-4 sticky top-0 z-40 border-b border-slate-800">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <h2 class="font-bold text-sm flex items-center space-x-2">
+                    <span class="bg-amber-500 text-slate-900 text-[10px] font-black px-2 py-0.5 rounded uppercase">Admin</span>
+                    <span>Painel de Gestão - AmigoPet</span>
+                </h2>
+                <button onclick="sairAdmin()" class="bg-rose-500 hover:bg-rose-600 text-white text-xs px-3 py-1.5 rounded-lg transition font-bold">Sair</button>
+            </div>
+        </header>
+
+        <main class="max-w-6xl mx-auto px-4 mt-6">
+            <!-- Abas do Admin -->
+            <div class="flex space-x-2 border-b border-slate-200 mb-6 overflow-x-auto pb-2">
+                <button onclick="trocarAba('dash', this)" class="btn-aba aba-ativa font-bold text-xs px-4 py-2 rounded-xl transition">Dashboard & Financeiro</button>
+                <button onclick="trocarAba('doacoes', this)" class="btn-aba bg-white text-slate-600 font-bold text-xs px-4 py-2 rounded-xl transition">Doações Recebidas</button>
+                <button onclick="trocarAba('gastos', this)" class="btn-aba bg-white text-slate-600 font-bold text-xs px-4 py-2 rounded-xl transition">Lançar Gastos</button>
+                <button onclick="trocarAba('cad-banner', this)" class="btn-aba bg-white text-slate-600 font-bold text-xs px-4 py-2 rounded-xl transition">Configurações & Link Pix</button>
+                <button onclick="trocarAba('cad-pet', this)" class="btn-aba bg-white text-slate-600 font-bold text-xs px-4 py-2 rounded-xl transition">Cadastrar Pet</button>
+                <button onclick="trocarAba('cad-sorteio', this)" class="btn-aba bg-white text-slate-600 font-bold text-xs px-4 py-2 rounded-xl transition">Editar Sorteio</button>
+                <button onclick="trocarAba('seguranca', this)" class="btn-aba bg-white text-slate-600 font-bold text-xs px-4 py-2 rounded-xl transition"><i class="fa-solid fa-key mr-1"></i> Alterar Senha</button>
+                <button onclick="trocarAba('reset-sistema', this)" class="btn-aba bg-rose-50 text-rose-600 font-bold text-xs px-4 py-2 rounded-xl transition"><i class="fa-solid fa-rotate-left mr-1"></i> Limpeza & Reset</button>
+            </div>
+
+            <!-- ABA 1: DASHBOARD & CAIXA -->
+            <div id="aba-dash" class="space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Arrecadado (Entradas)</p>
+                        <h3 id="dash-total" class="text-2xl font-black text-emerald-600 mt-1">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total de Gastos (Saídas)</p>
+                        <h3 id="dash-gastos" class="text-2xl font-black text-rose-500 mt-1">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Saldo Disponível em Caixa</p>
+                        <h3 id="dash-saldo" class="text-2xl font-black text-slate-900 mt-1">R$ 0,00</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <h4 class="font-bold text-slate-800 text-xs mb-4">Evolução do Caixa da Semana (R$)</h4>
+                    <canvas id="grafico" class="max-h-[220px]"></canvas>
+                </div>
+            </div>
+
+            <!-- ABA 2: DOAÇÕES RECEBIDAS -->
+            <div id="aba-doacoes" class="hidden space-y-4">
+                <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                    <input type="text" id="busca-doador" onkeyup="filtrarDoacoes()" placeholder="Buscar por doador ou contato..." class="border border-slate-200 rounded-lg px-3 py-1.5 text-xs w-64 bg-slate-50">
+                    <button onclick="exportarCSV()" class="bg-slate-900 text-white font-bold text-xs px-3.5 py-2 rounded-lg transition"><i class="fa-solid fa-file-csv mr-1"></i> Baixar Relatório CSV</button>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-x-auto shadow-sm">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 border-b border-slate-200 font-bold uppercase text-slate-400">
+                            <tr><th class="p-3">Doador</th><th class="p-3">Destino</th><th class="p-3">Contato</th><th class="p-3">Valor</th><th class="p-3">Data</th></tr>
+                        </thead>
+                        <tbody id="tabela-doacoes" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ABA 3: LANÇAR GASTOS -->
+            <div id="aba-gastos" class="hidden grid md:grid-cols-3 gap-6">
+                <form onsubmit="cadastrarGasto(event)" class="bg-white p-5 rounded-2xl border border-slate-200 space-y-3 md:col-span-1 shadow-sm">
+                    <h3 class="font-bold text-sm text-slate-900">Registrar Nova Despesa</h3>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição do Gasto</label>
+                        <input type="text" id="gasto-desc" placeholder="Ex: Ração 15kg" required class="w-full border border-slate-200 rounded-lg p-2 text-xs bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Valor do Gasto (R$)</label>
+                        <input type="number" id="gasto-valor" placeholder="Ex: 150" required class="w-full border border-slate-200 rounded-lg p-2 text-xs bg-slate-50">
+                    </div>
+                    <button type="submit" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 rounded-xl text-xs transition">
+                        Registrar Saída de Caixa
+                    </button>
+                </form>
+
+                <div class="md:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-sm text-slate-900 mb-3">Histórico de Saídas</h3>
+                    <div id="lista-gastos-admin" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- ABA 4: CONFIGURAÇÕES E LINK DE PAGAMENTO -->
+            <div id="aba-cad-banner" class="hidden max-w-md mx-auto">
+                <form onsubmit="salvarBannerEMeta(event)" class="bg-white p-5 rounded-2xl border border-slate-200 space-y-3 shadow-sm">
+                    <h3 class="font-bold text-sm text-slate-900">Configurações & Link do Mercado Pago</h3>
+                    
+                    <div class="bg-amber-50 p-3 rounded-xl border border-amber-200">
+                        <label class="block text-[10px] font-bold text-amber-900 uppercase mb-1"><i class="fa-solid fa-link mr-1"></i> Link de Pagamento / Pix do Mercado Pago</label>
+                        <input type="text" id="mp-link-input" value="https://mpago.la/2ppCmmG" placeholder="https://mpago.la/..." class="w-full border border-amber-200 rounded-lg p-2 text-xs bg-white">
+                        <p class="text-[9px] text-amber-700 mt-1">Link configurado com sucesso.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Meta de Arrecadação do Mês (R$)</label>
+                        <input type="number" id="meta-valor-input" required value="5000" class="w-full border border-slate-200 rounded-lg p-2 text-xs bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Título do Banner Principal</label>
+                        <input type="text" id="banner-titulo" required value="Ajude um pet resgatado ou participe da nossa rifa!" class="w-full border border-slate-200 rounded-lg p-2 text-xs bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição do Banner</label>
+                        <textarea id="banner-desc" required class="w-full border border-slate-200 rounded-lg p-2 text-xs h-16 bg-slate-50">Toda doação vai direto para alimentação, cirurgias e remédios dos nossos resgatados.</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Foto do Banner (Upload)</label>
+                        <input type="file" accept="image/*" onchange="previewImg(this, 'prev-banner')" class="w-full text-xs">
+                        <img id="prev-banner" class="w-full h-24 object-cover rounded-lg mt-2 hidden">
+                    </div>
+                    <button type="submit" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs transition">Salvar Alterações</button>
+                </form>
+            </div>
+
+            <!-- ABA 5: CADASTRAR PET -->
+            <div id="aba-cad-pet" class="hidden grid md:grid-cols-3 gap-6">
+                <form onsubmit="cadastrarPet(event)" class="bg-white p-5 rounded-2xl border border-slate-200 space-y-3 md:col-span-1 shadow-sm">
+                    <h3 class="font-bold text-sm text-slate-900">Novo Pet Resgatado</h3>
+                    <input type="text" id="pet-nome" placeholder="Nome do Pet" required class="w-full border border-slate-200 rounded-lg p-2 text-xs bg-slate-50">
+                    <textarea id="pet-historia" placeholder="História / Necessidade" required class="w-full border border-slate-200 rounded-lg p-2 text-xs h-16 bg-slate-50"></textarea>
+                    <input type="number" id="pet-meta" placeholder="Meta R$" required class="w-full border border-slate-200 rounded-lg p-2 text-xs bg-slate-50">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Foto do Pet (Upload)</label>
+                        <input type="file" accept="image/*" onchange="previewImg(this, 'prev-pet')" class="w-full text-xs">
+                        <img id="prev-pet" class="w-full h-24 object-cover rounded-lg mt-2 hidden">
+                    </div>
+                    <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 rounded-xl text-xs transition">Salvar Pet</button>
+                </form>
+                <div class="md:col-span-2 space-y-2">
+                    <h3 class="font-bold text-sm text-slate-900">Gerenciar Pets Cadastrados</h3>
+                    <div id="lista-pets-admin" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- ABA 6: EDITAR SORTEIO -->
+            <div id="aba-cad-sorteio" class="hidden max-w-md mx-auto">
+                <form onsubmit="salvarSorteio(event)" class="bg-white p-5 rounded-2xl border border-slate-200 space-y-3 shadow-sm">
+                    <h3 class="font-bold text-sm text-slate-900">Configurar Sorteio Solidário</h3>
+                    <input type="text" id="sorteio-titulo-input" value="Cesta de Prêmios + R$ 200 no Pix 🎁" required class="w-full border border-slate-200 rounded-lg p-2 text-xs bg-slate-50">
+                    <textarea id="sorteio-desc-input" required class="w-full border border-slate-200 rounded-lg p-2 text-xs h-16 bg-slate-50">Compre seu bilhete por apenas R$ 10,00 e nos ajude a comprar ração.</textarea>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Foto do Prêmio (Upload)</label>
+                        <input type="file" accept="image/*" onchange="previewImg(this, 'prev-sorteio')" class="w-full text-xs">
+                        <img id="prev-sorteio" class="w-full h-24 object-cover rounded-lg mt-2 hidden">
+                    </div>
+                    <button type="submit" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs transition">Atualizar Sorteio</button>
+                </form>
+            </div>
+
+            <!-- ABA 7: ALTERAR SENHA -->
+            <div id="aba-seguranca" class="hidden max-w-md mx-auto">
+                <form onsubmit="alterarSenhaLocal(event)" class="bg-white p-5 rounded-2xl border border-slate-200 space-y-3 shadow-sm">
+                    <h3 class="font-bold text-sm text-slate-900">Alterar Senha do Admin</h3>
+                    <p class="text-[11px] text-slate-500">Defina uma nova palavra-passe para o seu painel.</p>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nova Palavra-passe</label>
+                        <input type="password" id="nova-senha-input" placeholder="Sua nova senha" required class="w-full border border-slate-200 rounded-lg p-2 text-xs bg-slate-50">
+                    </div>
+                    <button type="submit" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs transition">Gravar Nova Senha</button>
+                </form>
+            </div>
+
+            <!-- ABA 8: LIMPEZA & RESET -->
+            <div id="aba-reset-sistema" class="hidden max-w-lg mx-auto space-y-4">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center space-x-2 text-rose-600 font-bold">
+                        <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                        <h3 class="text-base font-black text-slate-900">Gerenciamento de Reset do Caixa</h3>
+                    </div>
+                    <p class="text-xs text-slate-500">Use estas opções para gerir os dados da nuvem.</p>
+
+                    <div class="space-y-3 pt-2">
+                        <button onclick="resetarCaixaESaldo()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 rounded-xl text-xs transition flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-trash-arrow-up"></i>
+                            <span>Zerar Saldo e Doações Recebidas</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- FIREBASE FIRESTORE & SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyABPf-sSwvyyNNCCfKccoMP7pblYLOYIg",
+            authDomain: "doacao-ebcc3.firebaseapp.com",
+            projectId: "doacao-ebcc3",
+            storageBucket: "doacao-ebcc3.appspot.com",
+            messagingSenderId: "8127888543686",
+            appId: "1:8127888543686:web:d8c8d17cfab15868b7e4c7",
+            measurementId: "G-4014015THD"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.carregarDadosFirebase = async function() {
+            try {
+                const petsSnap = await getDocs(collection(db, "pets"));
+                if (!petsSnap.empty) {
+                    petsDB = [];
+                    petsSnap.forEach(d => petsDB.push({ idDoc: d.id, ...d.data() }));
+                }
+
+                const doacoesSnap = await getDocs(collection(db, "doacoes"));
+                if (!doacoesSnap.empty) {
+                    doacoesDB = [];
+                    doacoesSnap.forEach(d => doacoesDB.push({ idDoc: d.id, ...d.data() }));
+                }
+
+                const gastosSnap = await getDocs(collection(db, "gastos"));
+                if (!gastosSnap.empty) {
+                    gastosDB = [];
+                    gastosSnap.forEach(d => gastosDB.push({ idDoc: d.id, ...d.data() }));
+                }
+
+                renderSite();
+                if (!document.getElementById('painel-admin').classList.contains('hidden')) {
+                    renderAdmin();
+                }
+            } catch (e) {
+                console.log("Erro ao carregar do Firebase:", e);
+            }
+        };
+
+        window.salvarPetFirebase = async function(petObj) {
+            try {
+                await addDoc(collection(db, "pets"), petObj);
+                window.carregarDadosFirebase();
+            } catch (e) { alert("Erro ao salvar pet na nuvem."); }
+        };
+
+        window.deletarPetFirebase = async function(idDoc) {
+            try {
+                await deleteDoc(doc(db, "pets", idDoc));
+                window.carregarDadosFirebase();
+            } catch (e) { alert("Erro ao remover pet."); }
+        };
+
+        window.salvarDoacaoFirebase = async function(doacaoObj) {
+            try {
+                await addDoc(collection(db, "doacoes"), doacaoObj);
+                window.carregarDadosFirebase();
+            } catch (e) { console.log(e); }
+        };
+
+        window.salvarGastoFirebase = async function(gastoObj) {
+            try {
+                await addDoc(collection(db, "gastos"), gastoObj);
+                window.carregarDadosFirebase();
+            } catch (e) { alert("Erro ao salvar gasto."); }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            window.carregarDadosFirebase();
+        });
+    </script>
+
+    <!-- JAVASCRIPT PRINCIPAL -->
+    <script>
+        let adminSenha = localStorage.getItem('admin_senha') || "admin123";
+        let linkPagamentoMP = localStorage.getItem('mp_link_pagamento') || "https://mpago.la/2ppCmmG";
+        let metaGeralObjetivo = 5000;
+
+        let petsDB = [
+            { idDoc: 1, nome: "Thor", historia: "Fratura na patinha. Precisa de cirurgia.", meta: 800, arrecadado: 350, foto: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=500&q=80" },
+            { idDoc: 2, nome: "Luna", historia: "Gatinha com desnutrição severa.", meta: 400, arrecadado: 210, foto: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=500&q=80" }
+        ];
+
+        let doacoesDB = [
+            { doador: "Carlos", destino: "Thor", contato: "(92) 99123-4567", tipo: "whatsapp", valor: 100, data: "12/10/2026" }
+        ];
+
+        let gastosDB = [
+            { desc: "Consulta Veterinária Thor", valor: 0 }
+        ];
+
+        let destinoAtual = "Geral";
+        let tempImg = null;
+
+        if(localStorage.getItem('mp_link_pagamento')) {
+            document.getElementById('mp-link-input').value = localStorage.getItem('mp_link_pagamento');
+        }
+
+        function loginAdminDireto(e) {
+            e.preventDefault();
+            const senhaDigitada = document.getElementById('login-senha').value;
+
+            if (senhaDigitada === adminSenha) {
+                fecharModalLogin();
+                document.getElementById('site-publico').classList.add('hidden');
+                document.getElementById('painel-admin').classList.remove('hidden');
+                renderAdmin();
+                document.getElementById('login-senha').value = '';
+            } else {
+                alert("❌ Palavra-passe incorreta!");
+            }
+        }
+
+        function alterarSenhaLocal(e) {
+            e.preventDefault();
+            const novaSenha = document.getElementById('nova-senha-input').value;
+            adminSenha = novaSenha;
+            localStorage.setItem('admin_senha', adminSenha);
+            alert("✅ Nova palavra-passe guardada com sucesso!");
+            document.getElementById('nova-senha-input').value = '';
+        }
+
+        function sairAdmin() {
+            document.getElementById('painel-admin').classList.add('hidden');
+            document.getElementById('site-publico').classList.remove('hidden');
+            renderSite();
+        }
+
+        function abrirModalDoacao(destino, valor = 20) {
+            destinoAtual = destino;
+            document.getElementById('modal-titulo').innerText = `Doação: ${destino}`;
+            document.getElementById('valor-doacao').value = valor;
+            document.getElementById('modal-doacao').classList.remove('hidden');
+        }
+
+        function fecharModalDoacao() { 
+            document.getElementById('modal-doacao').classList.add('hidden'); 
+        }
+
+        function abrirModalLogin() { document.getElementById('modal-login').classList.remove('hidden'); }
+        function fecharModalLogin() { document.getElementById('modal-login').classList.add('hidden'); }
+
+        function irParaPagamentoDireto(e) {
+            e.preventDefault();
+
+            const emailInput = document.getElementById('email-doador').value.trim();
+            const telefone = document.getElementById('telefone-doador').value.trim();
+
+            if (!emailInput && !telefone) {
+                alert("⚠️ Preencha E-mail OU WhatsApp obrigatoriamente!");
+                return;
+            }
+
+            const valor = parseFloat(document.getElementById('valor-doacao').value);
+            const nome = document.getElementById('nome-doador').value.trim() || "Doador AmigoPet";
+
+            let novaDoacao = { 
+                doador: nome, 
+                destino: destinoAtual, 
+                contato: emailInput || telefone, 
+                tipo: emailInput ? 'email' : 'whatsapp', 
+                valor: valor, 
+                data: new Date().toLocaleDateString('pt-BR') 
+            };
+            
+            if (window.salvarDoacaoFirebase) {
+                window.salvarDoacaoFirebase(novaDoacao);
+            }
+
+            fecharModalDoacao();
+            window.open(linkPagamentoMP, '_blank');
+        }
+
+        function renderSite() {
+            const totalArrecadado = doacoesDB.reduce((acc, c) => acc + (c.valor || 0), 0);
+            const pctMeta = Math.min(Math.round((totalArrecadado / metaGeralObjetivo) * 100), 100);
+
+            document.getElementById('pub-meta-pct').innerText = `${pctMeta}%`;
+            document.getElementById('pub-meta-bar').style.width = `${pctMeta}%`;
+            document.getElementById('pub-meta-arrecadado').innerText = `R$ ${totalArrecadado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('pub-meta-objetivo').innerText = `R$ ${metaGeralObjetivo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+
+            const grid = document.getElementById('grid-pets-publicos');
+            grid.innerHTML = '';
+            petsDB.forEach(p => {
+                let pct = Math.min(Math.round(((p.arrecadado || 0) / p.meta) * 100), 100);
+                grid.innerHTML += `
+                    <div class="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                        <div>
+                            <img src="${p.foto}" class="w-full h-44 object-cover">
+                            <div class="p-5">
+                                <h3 class="font-black text-lg text-slate-900">${p.nome}</h3>
+                                <p class="text-xs text-slate-500 mt-1">${p.historia}</p>
+                                <div class="mt-4 bg-slate-100 h-2 rounded-full overflow-hidden">
+                                    <div class="bg-amber-500 h-full rounded-full" style="width:${pct}%"></div>
+                                </div>
+                                <div class="flex justify-between text-[11px] font-extrabold text-slate-600 mt-1.5">
+                                    <span>R$ ${p.arrecadado || 0}</span><span>Meta: R$ ${p.meta}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-5 pt-0">
+                            <button onclick="abrirModalDoacao('${p.nome}')" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2.5 rounded-xl transition">Doar para ${p.nome}</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function previewImg(input, id) {
+            if (input.files && input.files[0]) {
+                let r = new FileReader();
+                r.onload = function(e) {
+                    let img = document.getElementById(id);
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    tempImg = e.target.result;
+                }
+                r.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function trocarAba(aba, btn) {
+            document.querySelectorAll('.btn-aba').forEach(b => { b.classList.remove('aba-ativa'); b.classList.add('bg-white', 'text-slate-600'); });
+            btn.classList.add('aba-ativa');
+            ['dash', 'doacoes', 'gastos', 'cad-banner', 'cad-pet', 'cad-sorteio', 'seguranca', 'reset-sistema'].forEach(a => document.getElementById(`aba-${a}`).classList.add('hidden'));
+            document.getElementById(`aba-${aba}`).classList.remove('hidden');
+        }
+
+        function cadastrarGasto(e) {
+            e.preventDefault();
+            const desc = document.getElementById('gasto-desc').value;
+            const valor = parseFloat(document.getElementById('gasto-valor').value);
+
+            let novoGasto = { desc, valor };
+            if (window.salvarGastoFirebase) window.salvarGastoFirebase(novoGasto);
+            e.target.reset();
+            alert("✅ Despesa lançada na nuvem!");
+        }
+
+        function resetarCaixaESaldo() {
+            if (confirm("⚠️ Tem certeza que deseja zerar?")) {
+                alert("Para limpar os dados do banco, aceda ao painel do Firebase Firestore.");
+            }
+        }
+
+        function salvarBannerEMeta(e) {
+            e.preventDefault();
+            linkPagamentoMP = document.getElementById('mp-link-input').value.trim();
+            localStorage.setItem('mp_link_pagamento', linkPagamentoMP);
+            
+            metaGeralObjetivo = parseFloat(document.getElementById('meta-valor-input').value);
+            document.getElementById('pub-banner-titulo').innerText = document.getElementById('banner-titulo').value;
+            document.getElementById('pub-banner-desc').innerText = document.getElementById('banner-desc').value;
+            if (tempImg) document.getElementById('pub-banner-img').src = tempImg;
+            tempImg = null;
+            alert("✅ Configurações salvas com sucesso!");
+            renderSite();
+        }
+
+        function cadastrarPet(e) {
+            e.preventDefault();
+            let nome = document.getElementById('pet-nome').value;
+            let historia = document.getElementById('pet-historia').value;
+            let meta = parseFloat(document.getElementById('pet-meta').value);
+            let foto = tempImg || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=500&q=80";
+
+            let novoPet = { nome, historia, meta, arrecadado: 0, foto };
+            if (window.salvarPetFirebase) window.salvarPetFirebase(novoPet);
+
+            tempImg = null;
+            alert("✅ Pet cadastrado na nuvem!");
+            e.target.reset();
+            document.getElementById('prev-pet').classList.add('hidden');
+        }
+
+        function deletarPet(idDoc) {
+            if (confirm("Tem certeza que deseja remover este pet?")) {
+                if (window.deletarPetFirebase) window.deletarPetFirebase(idDoc);
+                alert("🗑️ Pet removido!");
+            }
+        }
+
+        function salvarSorteio(e) {
+            e.preventDefault();
+            document.getElementById('pub-sorteio-titulo').innerText = document.getElementById('sorteio-titulo-input').value;
+            document.getElementById('pub-sorteio-desc').innerText = document.getElementById('sorteio-desc-input').value;
+            if (tempImg) document.getElementById('pub-sorteio-img').src = tempImg;
+            tempImg = null;
+            alert("✅ Sorteio atualizado!");
+        }
+
+        function renderAdmin() {
+            let entradas = doacoesDB.reduce((acc, c) => acc + (c.valor || 0), 0);
+            let saidas = gastosDB.reduce((acc, c) => acc + (c.valor || 0), 0);
+            let saldo = entradas - saidas;
+
+            document.getElementById('dash-total').innerText = `R$ ${entradas.toFixed(2)}`;
+            document.getElementById('dash-gastos').innerText = `R$ ${saidas.toFixed(2)}`;
+            document.getElementById('dash-saldo').innerText = `R$ ${saldo.toFixed(2)}`;
+
+            let tbody = document.getElementById('tabela-doacoes');
+            tbody.innerHTML = '';
+            doacoesDB.forEach(d => {
+                let link = d.tipo === 'whatsapp' ? `<a href="https://wa.me/55${String(d.contato||'').replace(/\D/g,'')}" target="_blank" class="text-emerald-600 font-bold"><i class="fa-brands fa-whatsapp"></i> ${d.contato}</a>` : d.contato;
+                tbody.innerHTML += `<tr><td class="p-3 font-bold">${d.doador || 'Anônimo'}</td><td class="p-3">${d.destino}</td><td class="p-3">${link}</td><td class="p-3 font-bold text-emerald-600">R$ ${(d.valor||0).toFixed(2)}</td><td class="p-3 text-slate-400 text-[10px]">${d.data || ''}</td></tr>`;
+            });
+
+            let listaGastos = document.getElementById('lista-gastos-admin');
+            listaGastos.innerHTML = '';
+            gastosDB.forEach(g => {
+                listaGastos.innerHTML += `
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
+                        <span class="font-bold text-slate-800">${g.desc}</span>
+                        <span class="font-bold text-rose-500">- R$ ${(g.valor||0).toFixed(2)}</span>
+                    </div>
+                `;
+            });
+
+            let list = document.getElementById('lista-pets-admin');
+            list.innerHTML = '';
+            petsDB.forEach(p => {
+                list.innerHTML += `
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
+                        <div class="flex items-center space-x-2">
+                            <img src="${p.foto}" class="w-10 h-10 rounded-lg object-cover">
+                            <span class="font-bold text-slate-800">${p.nome} (Meta: R$ ${p.meta})</span>
+                        </div>
+                        <button onclick="deletarPet('${p.idDoc}')" class="bg-rose-100 hover:bg-rose-200 text-rose-600 font-bold px-3 py-1.5 rounded-lg transition">
+                            <i class="fa-solid fa-trash"></i> Deletar
+                        </button>
+                    </div>
+                `;
+            });
+
+            renderGrafico();
+        }
+
+        function filtrarDoacoes() {
+            let busca = document.getElementById('busca-doador').value.toLowerCase();
+            let linhas = document.querySelectorAll('#tabela-doacoes tr');
+            linhas.forEach(l => {
+                l.style.display = l.innerText.toLowerCase().includes(busca) ? '' : 'none';
+            });
+        }
+
+        function exportarCSV() {
+            let csv = "Doador,Destino,Contato,Valor,Data\n";
+            doacoesDB.forEach(d => {
+                csv += `"${d.doador}","${d.destino}","${d.contato}",${d.valor},"${d.data || ''}"\n`;
+            });
+            let blob = new Blob([csv], { type: 'text/csv' });
+            let a = document.createElement('a');
+            a.href = window.URL.createObjectURL(blob);
+            a.download = 'relatorio_doacoes.csv';
+            a.click();
+        }
+
+        let g = null;
+        function renderGrafico() {
+            if (g) g.destroy();
+            let ctx = document.getElementById('grafico').getContext('2d');
+            
+            let totaisPorDia = [0, 0, 0, 0, 0, 0, 0];
+            doacoesDB.forEach(d => {
+                let diaSemana = new Date().getDay();
+                let indiceGrafico = diaSemana === 0 ? 6 : diaSemana - 1;
+                totaisPorDia[indiceGrafico] += (d.valor || 0);
+            });
+
+            g = new Chart(ctx, {
+                type: 'line',
+                data: { 
+                    labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'], 
+                    datasets: [{ 
+                        label: 'Arrecadação R$', 
+                        data: totaisPorDia, 
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }] 
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+    </script>
+</body>
+</html>
